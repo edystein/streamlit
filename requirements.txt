@@ -1,4 +1,6 @@
 streamlit
+streamlit-authenticator
+watchdog
 pandas
 plotly
 jupyterlab

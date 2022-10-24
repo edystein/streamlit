@@ -1,0 +1,10 @@
+{
+    "configurations": [
+    {
+      "type": "python",
+      "name": "basic_run",
+      "arguments": [],
+      "executableArgs": "streamlit run ",
+    },
+    ]
+}
