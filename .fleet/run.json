@@ -3,8 +3,9 @@
     {
       "type": "python",
       "name": "basic_run",
-      "arguments": [],
+      "arguments": ["my_app.py"],
       "executableArgs": "streamlit run ",
-    },
+      "PyhtonInterpreterPath": "$USER_HOME$miniconda3/envs/fleet/bin/python"
+    }
     ]
 }

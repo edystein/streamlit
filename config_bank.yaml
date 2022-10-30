@@ -1,0 +1,13 @@
+view:
+  - yoav
+  - itamar
+  - ayala
+  - edy
+  - michal
+admin:
+  - edy
+  - michal
+data:
+  transactions: bank/transactions.pkl
+  transactions_2_approve: bank/transactions_2_approve.pkl
+  transactions_denied: bank/transactions_denied.pkl

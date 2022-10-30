@@ -2,41 +2,34 @@ import streamlit as st
 import streamlit_authenticator as stauth
 import yaml
 
+from google.oauth2 import service_account
+from google.cloud import storage
+
 import pandas as pd
 import numpy as np
+from common.authentication import authenticate
 
+
+# Create API client.
+credentials = service_account.Credentials.from_service_account_info(
+    st.secrets["gcp_service_account"]
+)
+client = storage.Client(credentials=credentials)
 
 # login authentication
-with open('config_auth.yml') as file:
-    config = yaml.load(file, Loader=yaml.SafeLoader)
+name, authentication_status, user_name, authenticator = authenticate()
 
-authenticator = stauth.Authenticate(
-    config['credentials'],
-    config['cookie']['name'],
-    config['cookie']['key'],
-    config['cookie']['expiry_days'],
-    config['preauthorized']
-)
-
-
-name, authentication_status, username = authenticator.login('Login', 'main')
-st.write(f'authentication_status: {authentication_status}')
-st.write(f'type(name): {type(name)}')
 if authentication_status:
     authenticator.logout('Logout', 'main')
     try:
-        st.write(f'Welcome *{name}*')
+        st.write(f'Welcome {name}')
     except TypeError:
         st.write(f'NAME WAS MISSING.')
     st.title('Some content')
-elif authentication_status == False:
-    st.error('Username/password is incorrect')
-elif authentication_status == None:
-    st.warning('Please enter your username and password')
-
-
-
-
+elif not authentication_status:
+    st.error('user_name/password is incorrect')
+elif authentication_status is None:
+    st.warning('Please enter your user_name and password')
 
 st.markdown("# Main page 🎈")
 st.sidebar.markdown("# Main page 🎈")
@@ -54,13 +47,11 @@ option = st.selectbox(
     df['first column'])
 st.write(f'option = {option}')
 
-
 if st.checkbox('Show dataframe'):
     chart_data = pd.DataFrame(
         np.random.randn(20, 3),
         columns=['a', 'b', 'c'])
-    st.dataframe( chart_data)
-
+    st.dataframe(chart_data)
 
 st.write("Here's our first attempt at using data to create a table:")
 st.write(pd.DataFrame({

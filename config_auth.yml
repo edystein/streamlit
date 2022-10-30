@@ -4,18 +4,16 @@ cookie:
   name: some_cookie_name
 credentials:
   usernames:
-    jsmith:
-      email: jsmith@gmail.com
-      name: John Smith
+    edy:
+      email: edy.stein@gmail.com
+      name: Edy Stein
       password: $2b$12$NFmFcLjD4thYzOXto9Pp/.yBxLmW4de1YkzvPjANksitK5EoRqUXa
-      rbriggs:
-        email: rbriggs@gmail.com
-        name: Rebecca Briggs
-        password: $2b$12$5qLTfu23UvK/2w7N/SmY4Oh0xSfwybnIkDu1rhPQcxVYvg1/jEEBG
-    stam:
-      email: stam@gmail.com
-      name: stam
-      password: $2b$12$WTDKaFm7wXccgXrCUb2AbecIOAA0hxRNL8tMRSWebKp4KVGv.i3PG
+#      123
+    itamar:
+      email: edy.stein@gmail.com
+      name: Itamar the King Stein
+      password: $2b$12$NFmFcLjD4thYzOXto9Pp/.yBxLmW4de1YkzvPjANksitK5EoRqUXa
+#      123
 preauthorized:
   emails:
   - edy.stein@gmail.com
