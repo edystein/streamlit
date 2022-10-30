@@ -16,20 +16,8 @@ credentials = service_account.Credentials.from_service_account_info(
 )
 client = storage.Client(credentials=credentials)
 
-# login authentication
-name, authentication_status, user_name, authenticator = authenticate()
-
-if authentication_status:
-    authenticator.logout('Logout', 'main')
-    try:
-        st.write(f'Welcome {name}')
-    except TypeError:
-        st.write(f'NAME WAS MISSING.')
-    st.title('Some content')
-elif not authentication_status:
-    st.error('user_name/password is incorrect')
-elif authentication_status is None:
-    st.warning('Please enter your user_name and password')
+# authentication
+name, authentication_status, user_name, authenticator, b_authentication_ok = authenticate()
 
 st.markdown("# Main page 🎈")
 st.sidebar.markdown("# Main page 🎈")
