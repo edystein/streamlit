@@ -7,6 +7,7 @@ from google.cloud import storage
 
 import pandas as pd
 import numpy as np
+from pages.TheBank import Bank
 from common.authentication import authenticate
 
 
@@ -24,6 +25,7 @@ st.sidebar.markdown("# Main page 🎈")
 
 st.write("# Hello world:")
 st.write("## Hello world 2")
+
 
 df = pd.DataFrame({
     'first column': [1, 2, 3, 4],
