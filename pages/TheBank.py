@@ -70,6 +70,8 @@ class Bank:
             self.page_account_overview()
         elif page == 'Transaction':
             self.page_transaction()
+        elif page == 'Admin':
+            self.page_admin()
 
     def page_account_overview(self):
         st.title('Account overview')
@@ -87,9 +89,6 @@ class Bank:
 
         st.table(c_bank.get_transactions_by_user(user=selected_username, transactions=transactions))
 
-    def is_admin(self):
-        return self.user in self.cfg['admin']
-
     def page_transaction(self):
         st.title("Transaction")
         selected_user = st.selectbox('User', c_bank.get_user_list(login_user_name=self.user))
@@ -99,9 +98,8 @@ class Bank:
             ('Withdraw', 'Deposit'))
         trans_sum = st.number_input('Insert sum', min_value=0, max_value=5000, step=100)
         trans_note = st.text_area('Note')
-        trans_set = st.button("Set Transaction")
 
-        if trans_set:
+        if st.button("Set Transaction"):
             st.balloons()
             if self.is_admin():
                 df_new_trans = pd.DataFrame({'user': [selected_user],
@@ -133,6 +131,56 @@ class Bank:
                 else:
                     self.df_2_approve = copy.deepcopy(df_new_trans)
             self.save_data()
+
+    def page_admin(self):
+        """
+        Approve transactions
+        manage users
+        reset dataset
+
+        """
+        if not self.is_admin():
+            st.write('Not an admin yet.\nCome back later\n🌼')
+            return
+        # approve transactions
+        st.header('Transactions to Approve')
+        if self.df_2_approve.shape[0]:
+            st.table(self.df_2_approve[:1])
+            st.button('Approve 👍', on_click=self._transaction_approve_true)
+            st.button('Don\'t approve 👎', on_click=self._transaction_approve_false)
+        else:
+            st.write('No transactions to approve you\'re all set')
+
+        # reset dataset
+        st.button('Reset Dataset', on_click=self.reset_bank)
+
+    def _transaction_approve_true(self):
+        self._transaction_approve(b_approve=True)
+
+    def _transaction_approve_false(self):
+        self._transaction_approve(b_approve=False)
+
+    def _transaction_approve(self, b_approve):
+        st.write(f'b_approve: {b_approve}')
+        # update new transaction
+        if b_approve:
+            df_new_trans = copy.deepcopy(self.df_2_approve[:1])
+            df_new_trans['status'] = self.status['approved']
+            df_new_trans['reviewer_name'] = self.user
+            df_new_trans['review_date'] = datetime.datetime.now().strftime("%y-%m-%d")
+
+            if self.df_transactions.shape[0]:
+                self.df_transactions = pd.concat([self.df_transactions, df_new_trans])
+            else:
+                self.df_transactions = copy.deepcopy(df_new_trans)
+        # update approve list
+        self.df_2_approve = self.df_2_approve[1:]
+
+        self.save_data()
+
+    def is_admin(self):
+        return self.user in self.cfg['admin']
+
 
     def get_user_list(self, login_user_name):
         if login_user_name in self.cfg['admin']:
