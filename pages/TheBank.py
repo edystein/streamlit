@@ -19,6 +19,11 @@ class Bank:
     status: approved, rejected, pending
     transactions_datasets: transactions, pending_trans, rejected_trans
     """
+    # Todo: transactions: show pending
+    # Todo: transactions graph
+    # Todo: transactions show tail
+    # Todo: Admin => are you sure you wana delete
+    # Todo: Admin: manage users
 
     def __init__(self, login_user):
         self.df_transactions = None
