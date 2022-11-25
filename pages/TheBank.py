@@ -19,11 +19,8 @@ class Bank:
     status: approved, rejected, pending
     transactions_datasets: transactions, pending_trans, rejected_trans
     """
-    # Todo: transactions: show pending
     # Todo: transactions graph
     # Todo: transactions show tail
-    # Todo: Admin => are you sure you wana delete
-    # Todo: Admin: manage users
 
     def __init__(self, login_user):
         self.df_transactions = None
@@ -40,20 +37,14 @@ class Bank:
         )
         self.client = storage.Client(credentials=credentials)
 
-        # if mode == 'view':
-        #     self.transactions = pd.read_pickle(BytesIO(
-        #         read_file(client=self.client, bucket_name=bucket_name, file_path=file_path, b_decode_as_string=False)))
-        #     print(self.transactions)
-        #     #     try to dump df
-        #     bucket = self.client.bucket(bucket_name)
-        #     with bucket.blob('bank/ztest_transactions.pkl').open(mode='wb') as fid:
-        #         self.transactions.to_pickle(fid)
-        #     print('Finished write test')
 
     def get_pages(self):
         return self.pages
 
     def reset_bank(self):
+        # backup current account
+        self.save_data(backup=True)
+
         df_transactions = pd.DataFrame({'user': [],
                                         'date': [],
                                         'amount': [],
@@ -64,7 +55,7 @@ class Bank:
                                         'review_date': []})
         self.df_transactions = df_transactions
         self.df_2_approve = df_transactions
-        self.save_data()
+        self.save_data(backup=False)
         st.write('Reset Bank passed!!!!')
 
     def render_page(self, page):
@@ -82,17 +73,13 @@ class Bank:
         st.title('Account overview')
         selected_username = st.selectbox('Select User', c_bank.get_user_list(login_user_name=self.user))
         st.sidebar.markdown(f"{selected_username}'s Account")
-        # load transactions
-        bucket_name = "streamlit-server-0"
-        file_path = 'bank/transactions.pkl'
-        with st.spinner('Wait while loading account...'):
-            transactions = pd.read_pickle(BytesIO(
-                gcp_storage.read_file(client=self.client,
-                                      bucket_name=bucket_name,
-                                      file_path=file_path,
-                                      b_decode_as_string=False)))
 
-        st.table(c_bank.get_transactions_by_user(user=selected_username, transactions=transactions))
+        st.title('Account:')
+        st.table(c_bank.get_transactions_by_user(user=selected_username, transactions=self.df_transactions))
+
+        st.title('Pending transactions:')
+        st.table(c_bank.get_transactions_by_user(user=selected_username, transactions=self.df_2_approve))
+
 
     def page_transaction(self):
         st.title("Transaction")
@@ -115,8 +102,6 @@ class Bank:
                                              'status': [self.status['approved']],
                                              'reviewer_name': [self.user],
                                              'review_date': [datetime.datetime.now().strftime("%y-%m-%d")]})
-                print(f'\tDebug: df_new_trans: {df_new_trans}')
-                print(f'\tDebug: self.df_transactions: {self.df_transactions}')
 
                 if self.df_transactions.shape[0]:
                     self.df_transactions = pd.concat([self.df_transactions, df_new_trans])
@@ -157,7 +142,9 @@ class Bank:
             st.write('No transactions to approve you\'re all set')
 
         # reset dataset
-        st.button('Reset Dataset', on_click=self.reset_bank)
+        st.title('\n\n\nReset Dataset:')
+        if st.button('Reset Dataset'):
+            self.reset_bank()
 
     def _transaction_approve_true(self):
         self._transaction_approve(b_approve=True)
@@ -206,15 +193,25 @@ class Bank:
                                       file_path=self.cfg['data']['transactions_2_approve'],
                                       b_decode_as_string=False)))
 
-    def save_data(self):
+    def save_data(self, backup=False):
         with st.spinner('Saving Data....'):
+            str_date = datetime.datetime.now().strftime('%m-%d-%Y')
+            if backup:
+                file_path = f"{self.cfg['data']['backup_transactions']}-{str_date}.pkl"
+            else:
+                file_path = self.cfg['data']['transactions']
             gcp_storage.write_df(client=self.client,
                                  bucket_name=self.bucket_name,
-                                 file_path=self.cfg['data']['transactions'],
+                                 file_path=file_path,
                                  df=self.df_transactions)
+
+            if backup:
+                file_path = f"{self.cfg['data']['backup_transactions_2_approve']}-{str_date}.pkl"
+            else:
+                file_path = self.cfg['data']['transactions_2_approve']
             gcp_storage.write_df(client=self.client,
                                  bucket_name=self.bucket_name,
-                                 file_path=self.cfg['data']['transactions_2_approve'],
+                                 file_path=file_path,
                                  df=self.df_2_approve)
 
     def get_transactions_by_user(self, user, transactions):
@@ -225,7 +222,6 @@ class Bank:
         df_trans['Balance'] = df_trans['Balance'].cumsum()
         df_trans = df_trans[['user', 'date', 'amount', 'action', 'Balance', 'remark', 'status', 'reviewer_name',
                              'review_date']]
-        print(f'\tDebug: {df_trans.columns}')
         return df_trans
 
 

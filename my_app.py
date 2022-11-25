@@ -12,12 +12,14 @@ from common.authentication import authenticate
 
 
 # Create API client.
-credentials = service_account.Credentials.from_service_account_info(
-    st.secrets["gcp_service_account"]
-)
+credentials = service_account.Credentials.from_service_account_info(st.secrets["gcp_service_account"])
 client = storage.Client(credentials=credentials)
 
 # authentication
 name, authentication_status, user_name, authenticator, b_authentication_ok = authenticate()
+try:
+    print(f'Debug: authenticator.credentials:\n{authenticator.credentials}\n\n\n\n**********')
+except:
+    print('Failed to write credentials')
 
 st.title('Welcome to the Stein app 🎈')

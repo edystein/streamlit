@@ -1,19 +1,33 @@
 import streamlit as st
 import streamlit_authenticator as stauth
 import yaml
+from google.cloud import storage
+from google.oauth2 import service_account
+
+from common import gcp_storage
 
 
 # login authentication
 def authenticate():
-    with open('config_auth.yml') as file:
-        config = yaml.load(file, Loader=yaml.SafeLoader)
+    # read cfg file from GCP
+    credentials = service_account.Credentials.from_service_account_info(st.secrets["gcp_service_account"])
+    client = storage.Client(credentials=credentials)
 
+    with open('config_bank.yaml') as file:
+        cfg = yaml.load(file, Loader=yaml.SafeLoader)
+
+    auth_cfg = yaml.safe_load(gcp_storage.read_file(client=client,
+                                                    bucket_name=cfg['data']['bucket_name'],
+                                                    file_path=cfg['data']['authentication'],
+                                                    b_decode_as_string=True))
+
+    print(f'dbg:auth_cfg: {auth_cfg}')
     authenticator = stauth.Authenticate(
-        config['credentials'],
-        config['cookie']['name'],
-        config['cookie']['key'],
-        config['cookie']['expiry_days'],
-        config['preauthorized']
+        auth_cfg['credentials'],
+        auth_cfg['cookie']['name'],
+        auth_cfg['cookie']['key'],
+        auth_cfg['cookie']['expiry_days'],
+        auth_cfg['preauthorized']
     )
     name, authentication_status, user_name = authenticator.login('Login', 'main')
 
@@ -22,7 +36,7 @@ def authenticate():
     if authentication_status:
         authenticator.logout('Logout', 'main')
         try:
-            st.write(f'Welcome {name}')
+            st.write(f'Hello {name}')
             b_authentication_ok = True
         except TypeError:
             st.write(f'NAME WAS MISSING. Please re-authenticate.')
@@ -33,3 +47,9 @@ def authenticate():
 
     return name, authentication_status, user_name, authenticator, b_authentication_ok
 
+
+def update_authentication_file(credentials):
+    with open('config_bank.yaml') as file:
+        cfg = yaml.load(file, Loader=yaml.SafeLoader)
+
+    gcp_storage.write_yaml(data=yaml.safe_dump(credentials), file_path=cfg['data']['authentication'])

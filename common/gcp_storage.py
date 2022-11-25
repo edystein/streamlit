@@ -1,3 +1,7 @@
+from google.oauth2 import service_account
+from google.cloud import storage
+import yaml
+
 
 # @st.experimental_memo(ttl=600)
 def read_file(client, bucket_name, file_path, b_decode_as_string=False):
@@ -21,3 +25,17 @@ def write_df(client, bucket_name, file_path, df):
     bucket = client.bucket(bucket_name)
     with bucket.blob(file_path).open(mode='wb') as fid:
         df.to_pickle(fid)
+
+
+def write_yaml(data, file_path):
+    # GCP credentials
+    credentials = service_account.Credentials.from_service_account_info(st.secrets["gcp_service_account"])
+    client = storage.Client(credentials=credentials)
+
+    with open('config_bank.yaml') as file:
+        cfg = yaml.load(file, Loader=yaml.SafeLoader)
+    bucket = client.bucket(cfg['data']['bucket_name'])
+
+    with bucket.blob(file_path).open(mode='wt') as fid:
+        yaml.safe_dump(data=data, stream=fid, default_flow_style=False)
+    print(f'Saved {file_path} to GCP')
