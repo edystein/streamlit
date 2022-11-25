@@ -11,6 +11,7 @@ from google.oauth2 import service_account
 from common import gcp_storage
 from common.authentication import authenticate
 import plotly.express as px
+import random
 
 
 class Bank:
@@ -203,10 +204,11 @@ class Bank:
                                       b_decode_as_string=False)))
 
     def save_data(self, backup=False):
+        rand_str = f'{random.randint(1, 1000):05d}'
         with st.spinner('Saving Data....'):
             str_date = datetime.datetime.now().strftime('%m-%d-%Y')
             if backup:
-                file_path = f"{self.cfg['data']['backup_transactions']}-{str_date}.pkl"
+                file_path = f"{self.cfg['data']['backup_transactions']}-{str_date}-{rand_str}.pkl"
             else:
                 file_path = self.cfg['data']['transactions']
             gcp_storage.write_df(client=self.client,
