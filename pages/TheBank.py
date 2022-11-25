@@ -10,6 +10,7 @@ from google.oauth2 import service_account
 
 from common import gcp_storage
 from common.authentication import authenticate
+import plotly.express as px
 
 
 class Bank:
@@ -75,10 +76,18 @@ class Bank:
         st.sidebar.markdown(f"{selected_username}'s Account")
 
         st.title('Account:')
-        st.table(c_bank.get_transactions_by_user(user=selected_username, transactions=self.df_transactions))
+        df_trans = c_bank.get_transactions_by_user(user=selected_username, transactions=self.df_transactions)
+        st.table(df_trans)
+
+        fig = px.line(df_trans, x="date", y="Balance", title=f'{selected_username} Account')
+        # fig.show()
+        st.plotly_chart(fig, use_container_width=True)
 
         st.title('Pending transactions:')
         st.table(c_bank.get_transactions_by_user(user=selected_username, transactions=self.df_2_approve))
+
+
+
 
 
     def page_transaction(self):
