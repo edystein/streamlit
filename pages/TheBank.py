@@ -217,7 +217,7 @@ class Bank:
                                  df=self.df_transactions)
 
             if backup:
-                file_path = f"{self.cfg['data']['backup_transactions_2_approve']}-{str_date}.pkl"
+                file_path = f"{self.cfg['data']['backup_transactions_2_approve']}-{str_date}-{rand_str}.pkl"
             else:
                 file_path = self.cfg['data']['transactions_2_approve']
             gcp_storage.write_df(client=self.client,
