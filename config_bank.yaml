@@ -1,0 +1,17 @@
+view:
+  - yoav
+  - itamar
+  - ayala
+  - edy
+  - michal
+admin:
+  - edy
+  - michal
+data:
+  authentication: config_auth.yml
+  bucket_name: streamlit-server-0
+  transactions: bank/transactions.pkl
+  transactions_2_approve: bank/transactions_2_approve.pkl
+  transactions_denied: bank/transactions_denied.pkl
+  backup_transactions: bank/backup/transactions
+  backup_transactions_2_approve: bank/backup/transactions_2_approve
