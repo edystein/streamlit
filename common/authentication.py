@@ -1,3 +1,5 @@
+import json
+
 import streamlit as st
 import streamlit_authenticator as stauth
 import yaml
@@ -16,12 +18,10 @@ def authenticate():
     with open('config_bank.yaml') as file:
         cfg = yaml.load(file, Loader=yaml.SafeLoader)
 
-    auth_cfg = yaml.safe_load(gcp_storage.read_file(client=client,
-                                                    bucket_name=cfg['data']['bucket_name'],
-                                                    file_path=cfg['data']['authentication'],
-                                                    b_decode_as_string=True))
-
-    print(f'dbg:auth_cfg: {auth_cfg}')
+    auth_cfg = json.loads(gcp_storage.read_file(client=client,
+                                                bucket_name=cfg['data']['bucket_name'],
+                                                file_path=cfg['data']['authentication'],
+                                                b_decode_as_string=True))
     authenticator = stauth.Authenticate(
         auth_cfg['credentials'],
         auth_cfg['cookie']['name'],
@@ -48,8 +48,17 @@ def authenticate():
     return name, authentication_status, user_name, authenticator, b_authentication_ok
 
 
-def update_authentication_file(credentials):
+def update_authentication_file(authenticator):
+    auth_cfg = {
+        'credentials': authenticator.credentials,
+        'preauthorized': authenticator.preauthorized,
+        'cookie': {
+            'name': authenticator.cookie_name,
+            'key': authenticator.key,
+            'expiry_days': authenticator.cookie_expiry_days
+        }
+    }
     with open('config_bank.yaml') as file:
         cfg = yaml.load(file, Loader=yaml.SafeLoader)
 
-    gcp_storage.write_yaml(data=yaml.safe_dump(credentials), file_path=cfg['data']['authentication'])
+    gcp_storage.write_txt(data=json.dumps(auth_cfg), file_path=cfg['data']['authentication'])

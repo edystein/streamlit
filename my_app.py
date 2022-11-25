@@ -1,13 +1,8 @@
 import streamlit as st
-import streamlit_authenticator as stauth
-import yaml
 
 from google.oauth2 import service_account
 from google.cloud import storage
 
-import pandas as pd
-import numpy as np
-from pages.TheBank import Bank
 from common.authentication import authenticate
 
 
@@ -17,9 +12,5 @@ client = storage.Client(credentials=credentials)
 
 # authentication
 name, authentication_status, user_name, authenticator, b_authentication_ok = authenticate()
-try:
-    print(f'Debug: authenticator.credentials:\n{authenticator.credentials}\n\n\n\n**********')
-except:
-    print('Failed to write credentials')
 
 st.title('Welcome to the Stein app 🎈')

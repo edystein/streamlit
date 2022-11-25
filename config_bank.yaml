@@ -8,7 +8,7 @@ admin:
   - edy
   - michal
 data:
-  authentication: config_auth.yml
+  authentication: config_auth.json
   bucket_name: streamlit-server-0
   transactions: bank/transactions.pkl
   transactions_2_approve: bank/transactions_2_approve.pkl

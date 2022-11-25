@@ -1,3 +1,4 @@
+import streamlit as st
 from google.oauth2 import service_account
 from google.cloud import storage
 import yaml
@@ -15,7 +16,7 @@ def read_file(client, bucket_name, file_path, b_decode_as_string=False):
     """
     bucket = client.bucket(bucket_name)
     if b_decode_as_string:
-        content = bucket.blob(file_path).download_as_string().decode("utf-8")
+        content = bucket.blob(file_path).download_as_string().decode('utf-8')
     else:
         content = bucket.blob(file_path).download_as_bytes()
     return content
@@ -27,7 +28,7 @@ def write_df(client, bucket_name, file_path, df):
         df.to_pickle(fid)
 
 
-def write_yaml(data, file_path):
+def write_txt(data, file_path):
     # GCP credentials
     credentials = service_account.Credentials.from_service_account_info(st.secrets["gcp_service_account"])
     client = storage.Client(credentials=credentials)
@@ -35,7 +36,6 @@ def write_yaml(data, file_path):
     with open('config_bank.yaml') as file:
         cfg = yaml.load(file, Loader=yaml.SafeLoader)
     bucket = client.bucket(cfg['data']['bucket_name'])
-
-    with bucket.blob(file_path).open(mode='wt') as fid:
-        yaml.safe_dump(data=data, stream=fid, default_flow_style=False)
+    blob = bucket.blob(file_path)
+    blob.upload_from_string(data=data)
     print(f'Saved {file_path} to GCP')

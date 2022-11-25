@@ -13,7 +13,9 @@ if b_authentication_ok:
     # update password
     try:
         if authenticator.reset_password(username, 'Reset password'):
-            update_authentication_file(authenticator.credentials)
+            print('start save credentials')
+            update_authentication_file(authenticator)
+            print('end save credentials')
             st.success('Password modified successfully')
     except Exception as e:
         st.error(e)
@@ -21,7 +23,7 @@ if b_authentication_ok:
     # update username & password
     try:
         if authenticator.update_user_details(username, 'Update user details'):
-            update_authentication_file(authenticator.credentials)
+            update_authentication_file(authenticator)
             st.success('Entries updated successfully')
 
     except Exception as e:
@@ -42,7 +44,7 @@ if b_authentication_ok:
     if 'edy' == username:
         try:
             if authenticator.register_user('Register user', preauthorization=False):
-                update_authentication_file(authenticator.credentials)
+                update_authentication_file(authenticator)
                 st.success('User registered successfully')
         except Exception as e:
             st.error(e)
